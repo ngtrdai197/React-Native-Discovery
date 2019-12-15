@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import authReducer from './auth.reducer'
+import weatherReducer from './weather.reducer'
 export const allReducers = combineReducers({
-  authReducer,
+  weatherReducer,
 })

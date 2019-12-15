@@ -7,9 +7,9 @@ const initStateAuth = {
 
 export default (state = initStateAuth, action) => {
   switch (action.type) {
-    case typeActions.SINGUP_SUCCESS:
-      return { ...state, data: action.payload }
-    case typeActions.SINGUP_FAIL:
+    case typeActions.GET_WEATHER_SUCCESS:
+      return { ...state, data: action.payload.data[0] }
+    case typeActions.GET_WEATHER_FAIL:
       return { ...state, error: action.payload }
     default:
       return state
