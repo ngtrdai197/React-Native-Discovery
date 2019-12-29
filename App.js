@@ -3,17 +3,17 @@ import { View, StyleSheet } from 'react-native'
 import { Provider } from 'react-redux'
 import { store } from './store'
 import NavBar from './components/NavBar'
-import Home from './screens/Home'
+import { AppContainer } from './screens'
 
 export default function App() {
   /**
-   * @Description Separate components
+   * @description Separate components
    */
   return (
     <Provider store={store}>
       <View style={styles.container}>
         <NavBar />
-        <Home />
+        <AppContainer />
       </View>
     </Provider>
   )

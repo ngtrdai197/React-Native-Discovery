@@ -7,112 +7,89 @@ import {
   SafeAreaView,
   FlatList,
   TextInput,
+  Image,
 } from 'react-native'
 import Feather from 'react-native-vector-icons/Feather'
 import { LinearGradient } from 'expo-linear-gradient'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { getWeather } from '../store/actions'
+import { getWeather, getWeathers } from '../store/actions'
+import Item from '../components/Item'
 
 function Home(props) {
-  const [items, setItems] = useState([
-    {
-      time: 'time 1',
-      temperature: '10',
-      id: '1',
-      status: 1,
-    },
-    {
-      time: 'time 2',
-      temperature: '10',
-      id: '2',
-      status: 1,
-    },
-    {
-      time: 'time 3',
-      temperature: '10',
-      id: '3',
-      status: 1,
-    },
-    {
-      time: 'time 4',
-      temperature: '10',
-      id: '4',
-      status: 1,
-    },
-    {
-      time: 'time 5',
-      temperature: '10',
-      id: '5',
-      status: 1,
-    },
-    {
-      time: 'time 6',
-      temperature: '10',
-      id: '6',
-      status: 1,
-    },
-    {
-      time: 'time 7',
-      temperature: '10',
-      id: '7',
-      status: 1,
-    },
-    {
-      time: 'time 8',
-      temperature: '10',
-      id: '8',
-      status: 1,
-    },
-  ])
+  const { weatherState, navigation } = props
   const [value, onChangeText] = useState('')
-  const [locationWeather, setLocationWeather] = useState({})
-
+  const [locationWeather, setLocationWeather] = useState('')
   useEffect(() => {
-    props.getWeather()
+    props.getWeathers()
   }, [])
-
-  // if (props.weather) {
-  //   setLocationWeather(props.weather)
-  //   console.log(`locationWeather: `, locationWeather)
-  // }
-
+  const items = weatherState.weathers
+  const loaded = weatherState.weathers.length > 0
+  const renderItems = () => {
+    return loaded ? (
+      <SafeAreaView>
+        <FlatList
+          data={items}
+          horizontal={true}
+          renderItem={({ item }) => (
+            <Item
+              app_max_temp={item.app_max_temp}
+              datetime={item.datetime}
+              icon={item.weather.icon}
+              navigation={navigation}
+            />
+          )}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => index + ''}
+        />
+      </SafeAreaView>
+    ) : (
+      <View style={{ alignItems: 'center' }}>
+        <Text style={{ color: '#fff', fontSize: 20 }}>Loading ...</Text>
+      </View>
+    )
+  }
   return (
     <View style={styles.container}>
-      {/* <View style={{ backgroundColor: '#0d47a1', flex: 1 }} /> */}
       <LinearGradient
-        colors={['#1565c0', '#039be5', '#03a9f4']} //
+        colors={['#303f9f', '#1e88e5', '#03a9f4']} //
         style={{
           flex: 1,
         }}
       >
-        <Text style={styles.location}>Madrid, Spain</Text>
-        <Text style={styles.times}>Fri 6 December</Text>
+        <Text style={styles.location}>
+          {locationWeather ? locationWeather : 'Ho chi minh'}, VietNam
+        </Text>
+
+        <Text style={styles.times}>{new Date().toDateString()}</Text>
+
         <View style={styles.icon}>
-          <Feather name="cloud-drizzle" color="#fff" size={90} />
-          <Text style={styles.temperature}>16 độ</Text>
+          <Image
+            style={{
+              width: 120,
+              height: 100,
+            }}
+            source={{
+              uri: `https://www.weatherbit.io/static/img/icons/${items[0] &&
+                items[0].weather.icon}.png`,
+            }}
+          />
+          <Text style={styles.temperature}>
+            {items[0] && items[0].app_max_temp} độ
+          </Text>
         </View>
+
         <View style={{ alignItems: 'center', marginTop: 20 }}>
-          <Text style={styles.temperature}>It's Raining now</Text>
+          <Text style={styles.temperature}>
+            {items[0] && items[0].weather.description}
+          </Text>
         </View>
+
         <View style={styles.timeToday}>
           <Text style={styles.textTimeToday}>Today</Text>
         </View>
-        <SafeAreaView>
-          <FlatList
-            data={items}
-            horizontal={true}
-            renderItem={({ item }) => (
-              <Item
-                time={item.time}
-                temperature={item.temperature}
-                status={item.status}
-              />
-            )}
-            keyExtractor={item => item.id}
-          />
-        </SafeAreaView>
-        <View>
+        {renderItems()}
+        {/* <View>
           <TextInput
             underlineColorAndroid="transparent"
             placeholderTextColor="#fff"
@@ -126,26 +103,14 @@ function Home(props) {
               searchWeather(props, value)
             }}
           />
-        </View>
+        </View> */}
       </LinearGradient>
     </View>
   )
 }
 
 function searchWeather(props, cityName) {
-  console.log('searchWeather: ', cityName)
-  props.getWeather(cityName)
-  console.log('weather return: ', props.weather)
-}
-
-function Item({ time, temperature, status }) {
-  return (
-    <View style={styles.item}>
-      <Text>{time}</Text>
-      <Text>{status}</Text>
-      <Text>{temperature}</Text>
-    </View>
-  )
+  props.getWeathers(cityName)
 }
 
 const styles = StyleSheet.create({
@@ -185,18 +150,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 23,
   },
-  item: {
-    backgroundColor: '#ed3737',
-    fontSize: 17,
-    padding: 10,
-    marginRight: 10,
-  },
 })
 const mapStateToProps = state => ({
-  weather: state.weatherReducer.data,
+  weatherState: state.weatherReducer,
 })
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators({ getWeather: getWeather }, dispatch)
+  return bindActionCreators({ getWeathers: getWeathers }, dispatch)
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
